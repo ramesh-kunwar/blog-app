@@ -1,13 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import config from "./config/config";
-
+import { useDispatch } from "react-redux";
+import authService from "./appwrite/auth.js";
+import { login, logout } from "./store/authSlice.js";
+import Header from "./components/Header/Header";
+import Footer from "./components/Footer/Footer";
+import { Outlet } from "react-router-dom";
 const App = () => {
-  console.log(config.APPWRITE_BUCKET_ID);
-  return (
-    <div>
-      <h1>A Blog App With App Write</h1>
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    authService
+      .getCurrentUser()
+      .then((userData) => {
+        if (userData) {
+          dispatch(login({ userData }));
+        } else {
+          dispatch(logout());
+        }
+      })
+      .finally(() => setLoading(false));
+  });
+
+  return !loading ? (
+    <div className="min-h-screen flex flex-wrap content-between justify-between bg-gray-400">
+      <div className="w-full block">
+        <Header />
+        <main>
+          TODO: <Outlet />
+        </main>
+        <Footer />
+      </div>
     </div>
-  );
+  ) : null;
 };
 
 export default App;
